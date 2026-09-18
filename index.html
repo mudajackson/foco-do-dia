@@ -1,0 +1,544 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#1E7A4F">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style>
+</head>
+<body><title>Foco do Dia</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#F4F7F4; --card:#FFFFFF; --ink:#1B2420; --muted:#5A6A61;
+  --accent:#1E7A4F; --accent-soft:#E2F0E8; --amber:#C97A1E; --amber-soft:#F7ECDD;
+  --line:#DCE4DE; --chip:#EAF0EB; --now:#1E7A4F;
+  --done:#9BABA1;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121A15; --card:#1A231D; --ink:#E7EEE9; --muted:#9BABA1;
+    --accent:#52C58C; --accent-soft:#1E3328; --amber:#E8A159; --amber-soft:#33291A;
+    --line:#2A362E; --chip:#232E27; --now:#52C58C; --done:#5A6A61;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121A15; --card:#1A231D; --ink:#E7EEE9; --muted:#9BABA1;
+  --accent:#52C58C; --accent-soft:#1E3328; --amber:#E8A159; --amber-soft:#33291A;
+  --line:#2A362E; --chip:#232E27; --now:#52C58C; --done:#5A6A61;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); margin:0;
+  font-family:"Instrument Sans",system-ui,sans-serif; font-size:16px; line-height:1.5;
+}
+.wrap{max-width:520px; margin:0 auto; padding-inline:16px; padding-block:0 48px}
+
+header{padding-block:22px 14px; display:flex; flex-direction:column; gap:2px}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:.68rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--accent)}
+h1{font-family:"Archivo",sans-serif; font-size:1.6rem; font-weight:800; letter-spacing:-.02em; margin:0; line-height:1.1; text-wrap:balance}
+.daynav{display:flex; align-items:center; gap:8px; margin-top:12px}
+.daynav button{
+  font-family:"Archivo",sans-serif; font-weight:700; font-size:1rem;
+  background:var(--card); color:var(--ink); border:1px solid var(--line);
+  border-radius:12px; padding:8px 0; cursor:pointer; width:48px; height:42px;
+  display:flex; align-items:center; justify-content:center;
+}
+.daynav button.today-btn{width:auto; flex:1; font-size:.88rem}
+.daynav button.today-btn[disabled]{opacity:.45; cursor:default}
+.daynav button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.viewing{font-family:"IBM Plex Mono",monospace; font-size:.7rem; font-weight:600; color:var(--amber); margin-top:8px; letter-spacing:.06em; text-transform:uppercase}
+.viewing[hidden]{display:none!important}
+
+.daytype{
+  display:inline-flex; align-items:center; gap:8px; margin-top:10px;
+  background:var(--accent-soft); color:var(--accent); border-radius:999px;
+  font-family:"Archivo",sans-serif; font-weight:700; font-size:.9rem; padding:7px 16px;
+  align-self:flex-start;
+}
+.daytype.rest{background:var(--amber-soft); color:var(--amber)}
+
+.progress{margin-top:14px; display:flex; flex-direction:column; gap:6px}
+.pbar{height:8px; background:var(--chip); border-radius:99px; overflow:hidden}
+.pbar i{display:block; height:100%; width:0%; background:var(--accent); border-radius:99px; transition:width .3s}
+.plabel{font-family:"IBM Plex Mono",monospace; font-size:.72rem; font-weight:600; color:var(--muted)}
+
+.water{
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:14px 16px; margin-top:14px; display:flex; flex-direction:column; gap:10px;
+}
+.w-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap}
+.w-title{font-family:"Archivo",sans-serif; font-weight:800; font-size:1rem}
+.w-count{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:.85rem; color:var(--accent)}
+.w-dots{display:flex; gap:6px; flex-wrap:wrap}
+.w-dots span{
+  width:22px; height:22px; border-radius:50%; border:2px solid var(--line);
+  background:var(--chip); flex-shrink:0;
+}
+.w-dots span.fill{background:#3B9BD6; border-color:#3B9BD6}
+.w-dots span.goal{border-color:var(--accent); border-style:dashed}
+.w-dots span.goal.fill{border-style:solid}
+.w-actions{display:flex; gap:8px}
+.w-actions button{
+  font-family:"Archivo",sans-serif; font-weight:700; font-size:.9rem;
+  border:1px solid var(--line); border-radius:12px; cursor:pointer; padding:10px 0;
+}
+.w-actions button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+#w-minus{width:52px; background:var(--chip); color:var(--ink)}
+#w-plus{flex:1; background:var(--accent); color:#fff; border-color:var(--accent)}
+:root[data-theme="dark"] #w-plus{color:#0E1511}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #w-plus{color:#0E1511} }
+.w-note{margin:0; font-size:.78rem; color:var(--muted)}
+
+.nagtoggle{
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:12px 16px; margin-top:10px; display:flex; align-items:center; gap:12px;
+}
+.nagtoggle input{width:20px; height:20px; accent-color:var(--amber); flex-shrink:0}
+.nagtoggle .nt-t{font-family:"Archivo",sans-serif; font-weight:700; font-size:.9rem}
+.nagtoggle .nt-s{font-size:.78rem; color:var(--muted)}
+.nagbar{
+  position:fixed; left:0; right:0; bottom:0; z-index:20;
+  background:var(--amber); color:#fff; cursor:pointer; border:none; width:100%;
+  font-family:"Archivo",sans-serif; font-weight:700; font-size:.95rem; text-align:left;
+  padding:14px 20px; padding-bottom:calc(14px + env(safe-area-inset-bottom, 0px));
+  display:flex; align-items:center; gap:10px;
+  animation:nagpulse 1.6s ease-in-out infinite;
+}
+.nagbar small{font-family:"Instrument Sans",sans-serif; font-weight:500; font-size:.75rem; opacity:.9; display:block}
+@keyframes nagpulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.18)}}
+@media (prefers-reduced-motion: reduce){ .nagbar{animation:none} }
+body.has-nag .foot{padding-bottom:90px}
+
+.timeline{margin-top:10px; display:flex; flex-direction:column}
+.step{
+  display:grid; grid-template-columns:56px 1fr; gap:0 12px;
+  position:relative; padding-block:6px;
+}
+.step .time{
+  font-family:"IBM Plex Mono",monospace; font-size:.78rem; font-weight:600;
+  color:var(--muted); text-align:right; padding-top:16px; font-variant-numeric:tabular-nums;
+}
+.step::before{
+  content:""; position:absolute; left:66px; top:0; bottom:0;
+  width:2px; background:var(--line);
+}
+.step:first-child::before{top:22px}
+.step:last-child::before{bottom:auto; height:22px}
+.scard{
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:12px 14px 12px 16px; margin-left:16px; position:relative;
+}
+.scard::before{
+  content:""; position:absolute; left:-21.5px; top:18px; width:11px; height:11px;
+  border-radius:50%; background:var(--bg); border:2.5px solid var(--muted);
+}
+.step.now .scard{border-color:var(--now); box-shadow:0 0 0 1px var(--now)}
+.step.now .scard::before{background:var(--now); border-color:var(--now)}
+.step.done .scard::before{background:var(--accent); border-color:var(--accent)}
+.step.done .scard .t, .step.done .scard .sub{color:var(--done)}
+.step.done .scard .t span{text-decoration:line-through}
+
+.scard label{display:flex; align-items:flex-start; gap:10px; cursor:pointer}
+.scard input{width:20px; height:20px; accent-color:var(--accent); margin-top:1px; flex-shrink:0}
+.scard .t{font-family:"Archivo",sans-serif; font-weight:700; font-size:.95rem}
+.scard .sub{font-size:.83rem; color:var(--muted); margin-top:2px}
+.nowpill{
+  display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:.62rem; font-weight:600;
+  letter-spacing:.1em; background:var(--now); color:#fff; border-radius:999px;
+  padding:2px 8px; margin-left:8px; vertical-align:2px;
+}
+:root[data-theme="dark"] .nowpill{color:#0E1511}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .nowpill{color:#0E1511} }
+
+.workout{margin-top:10px; border-top:1px dashed var(--line); padding-top:10px}
+.workout .wk{font-family:"IBM Plex Mono",monospace; font-size:.68rem; font-weight:600; color:var(--amber); letter-spacing:.08em; text-transform:uppercase}
+.workout ul{margin:6px 0 0; padding-left:2px; list-style:none; display:flex; flex-direction:column; gap:6px}
+.workout li{display:flex; justify-content:space-between; gap:12px; font-size:.86rem; align-items:baseline}
+.workout li b{font-weight:600}
+.workout .sr{font-family:"IBM Plex Mono",monospace; font-size:.78rem; font-weight:600; color:var(--accent); white-space:nowrap}
+.workout .tip{font-size:.8rem; color:var(--muted); margin-top:8px}
+
+.section-h{margin-top:32px; display:flex; flex-direction:column; gap:2px}
+.section-h h2{font-family:"Archivo",sans-serif; font-size:1.15rem; font-weight:800; margin:0}
+.section-h p{margin:0; font-size:.85rem; color:var(--muted)}
+.alarms{background:var(--card); border:1px solid var(--line); border-radius:14px; margin-top:12px; overflow:hidden}
+.alarm{display:flex; align-items:center; gap:14px; padding:11px 16px; border-bottom:1px solid var(--line)}
+.alarm:last-child{border-bottom:none}
+.alarm .at{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:.95rem; color:var(--accent); min-width:52px; font-variant-numeric:tabular-nums}
+.alarm .al{font-size:.9rem}
+.alarm .al b{font-family:"Archivo",sans-serif}
+.alarm .rep{margin-left:auto; font-family:"IBM Plex Mono",monospace; font-size:.65rem; font-weight:600; color:var(--muted); background:var(--chip); border-radius:999px; padding:3px 9px; white-space:nowrap}
+.howto{background:var(--accent-soft); border-radius:12px; padding:13px 16px; font-size:.85rem; margin-top:10px}
+.howto b{font-family:"Archivo",sans-serif; color:var(--accent)}
+
+.foot{margin-top:28px; display:flex; flex-direction:column; gap:12px}
+.hint{
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:14px 16px; font-size:.85rem; color:var(--muted);
+}
+.hint b{color:var(--ink); font-family:"Archivo",sans-serif}
+.motto{text-align:center; font-family:"Archivo",sans-serif; font-weight:800; font-size:.9rem; color:var(--muted); padding-top:6px}
+a.link{color:var(--accent); font-weight:600; text-decoration:none}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow" id="hdr-eyebrow">Protocolo Foco</span>
+  <h1 id="hdr-date">Carregando…</h1>
+  <div class="daynav">
+    <button id="nav-prev" aria-label="Dia anterior">◀</button>
+    <button id="nav-today" class="today-btn">Voltar para hoje</button>
+    <button id="nav-next" aria-label="Próximo dia">▶</button>
+  </div>
+  <span class="viewing" id="viewing-note" hidden></span>
+  <span class="daytype" id="hdr-type"></span>
+  <div class="progress">
+    <div class="pbar"><i id="pfill"></i></div>
+    <span class="plabel" id="plabel">0 de 0 concluídos</span>
+  </div>
+</header>
+
+<div class="water">
+  <div class="w-head"><span class="w-title">💧 Água do dia</span><span class="w-count" id="w-count">0 copos · 0,00 L</span></div>
+  <div class="w-dots" id="w-dots" role="img" aria-label="Copos de água bebidos"></div>
+  <div class="w-actions">
+    <button id="w-minus" aria-label="Remover um copo">−</button>
+    <button id="w-plus">+ 1 copo (250 ml)</button>
+  </div>
+  <p class="w-note">Meta: <b>8 copos (2 L)</b> · ideal: 10 (2,5 L). Toque a cada copo bebido. Os momentos certos estão marcados com 💧 na linha do tempo abaixo.</p>
+</div>
+
+<label class="nagtoggle">
+  <input type="checkbox" id="nag-sound">
+  <span><span class="nt-t">🔔 Lembrete insistente</span><br>
+  <span class="nt-s">Com o app aberto: passou a hora e não marcou? Aviso na tela + apito repetindo a cada 5 min até você marcar. (Com o app fechado, quem toca são os alarmes do Relógio.)</span></span>
+</label>
+
+<div class="timeline" id="timeline"></div>
+
+<div class="section-h">
+  <h2>⏰ Alarmes do iPhone</h2>
+  <p>O iOS não deixa uma página disparar notificação sozinha — mas o alarme nativo resolve melhor: configure <b>uma vez</b> no app Relógio e ele repete sempre, mesmo com o celular no bolso.</p>
+</div>
+<div class="alarms">
+  <div class="alarm"><span class="at">07:00</span><span class="al"><b>Acordar</b> + copo de água</span><span class="rep">todos os dias</span></div>
+  <div class="alarm"><span class="at">07:55</span><span class="al"><b>Remédio da manhã</b> (2 comprimidos às 8h)</span><span class="rep">todos os dias</span></div>
+  <div class="alarm"><span class="at">08:30</span><span class="al"><b>Aplicação semanal</b></span><span class="rep">só sábado</span></div>
+  <div class="alarm"><span class="at">08:55</span><span class="al"><b>Caminhada na praça</b> (09:00)</span><span class="rep">sáb e dom</span></div>
+  <div class="alarm"><span class="at">09:40</span><span class="al"><b>Academia</b> — treino às 10:00</span><span class="rep">seg, qua, sex</span></div>
+  <div class="alarm"><span class="at">10:30</span><span class="al"><b>Água</b> — 2 copos (500 ml)</span><span class="rep">ter, qui, sáb, dom</span></div>
+  <div class="alarm"><span class="at">12:30</span><span class="al"><b>Almoço</b> + 1 copo de água</span><span class="rep">todos os dias</span></div>
+  <div class="alarm"><span class="at">15:30</span><span class="al"><b>Lanche</b> + água + último café</span><span class="rep">todos os dias</span></div>
+  <div class="alarm"><span class="at">17:25</span><span class="al"><b>Treino em casa</b> (bike + barra)</span><span class="rep">ter e qui</span></div>
+  <div class="alarm"><span class="at">19:30</span><span class="al"><b>Jantar</b> — proteína primeiro</span><span class="rep">todos os dias</span></div>
+  <div class="alarm"><span class="at">20:00</span><span class="al"><b>Caminhada leve</b> — 30 min</span><span class="rep">seg a sex</span></div>
+  <div class="alarm"><span class="at">20:55</span><span class="al"><b>Remédio da noite</b> (1 comprimido às 21h)</span><span class="rep">todos os dias</span></div>
+  <div class="alarm"><span class="at">21:15</span><span class="al"><b>Registro do dia</b> no chat</span><span class="rep">todos os dias</span></div>
+  <div class="alarm"><span class="at">22:30</span><span class="al"><b>Desacelerar</b> — luz baixa, telas fracas</span><span class="rep">todos os dias</span></div>
+  <div class="alarm"><span class="at">23:15</span><span class="al"><b>Ir deitar</b> (dormir 23:30)</span><span class="rep">todos os dias</span></div>
+</div>
+<div class="howto"><b>Como configurar (5 min, uma vez só):</b> abra o app <b>Relógio</b> → aba <b>Alarme</b> → toque em <b>+</b> → escolha a hora → em <b>Repetir</b> marque os dias indicados acima → em <b>Etiqueta</b> escreva o nome (ex.: "Treino 💪") → Salvar. Repita para cada linha da lista. Dica: nos remédios, deixe o alarme <b>sem soneca</b>.</div>
+
+<div class="foot">
+  <div class="hint"><b>Instalar como app no iPhone:</b> abra esta página no Safari → toque no botão Compartilhar (quadrado com seta) → <b>"Adicionar à Tela de Início"</b>. O ícone fica junto dos seus apps e o histórico dos dias fica salvo no aparelho.</div>
+  <div class="hint"><b>Histórico:</b> use as setas ◀ ▶ no topo para revisar dias anteriores (o que você marcou fica salvo por data) ou espiar os próximos dias do plano. Você pode marcar itens de dias passados que esqueceu de registrar.</div>
+  <div class="hint">Plano completo (treinos das 4 semanas, nutrição e lista de compras): <a class="link" href="https://claude.ai/artifact/WEPxtAnJtguVeKns7PSEQP">Protocolo Foco</a>. No fim do dia, mande seu registro no chat do gestor.</div>
+  <p class="motto">Consistência &gt; perfeição</p>
+</div>
+</div>
+
+<button class="nagbar" id="nagbar" hidden>
+  <span>⏰</span>
+  <span id="nag-text">Pendente</span>
+</button>
+
+<script>
+(function(){
+  var DIAS = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+  var MESES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+  var BLOCK_START = new Date(2026,8,21); // segunda, 21 set 2026 — início da Semana 1
+
+  var GYM = {
+    1:[["Leg press","2×10 · carga leve"],["Puxada na frente (pulley)","2×10"],["Supino na máquina","2×10"],["Remada sentada","2×10"],["Prancha","2×20 s"]],
+    2:[["Leg press","3×10"],["Puxada na frente (pulley)","3×10"],["Supino na máquina","3×10"],["Remada sentada","3×10"],["Desenvolvimento máquina","2×10 · leve"],["Prancha","3×25 s"]],
+    3:[["Leg press","3×10–12 · sobe a carga"],["Puxada na frente (pulley)","3×10–12"],["Supino na máquina","3×10–12"],["Remada sentada","3×10–12"],["Desenvolvimento máquina","3×10"],["Prancha","3×30 s"]],
+    4:[["Leg press","3×10–12 · consolidar"],["Puxada na frente (pulley)","3×10–12"],["Supino na máquina","3×10–12"],["Remada sentada","3×10–12"],["Desenvolvimento máquina","3×10"],["Prancha","3×30 s"]]
+  };
+  var CASA = {
+    1:[["Bike ergométrica","15 min · PSE 3–4"],["Barra: sustentação","2×10–15 s"]],
+    2:[["Bike ergométrica","20 min · PSE 4–5"],["Barra: sustentação + negativas","3×15 s + 2×2"]],
+    3:[["Bike com tiros","4× 1 min forte / 2 min leve"],["Negativas na barra","3×3 lentas"]],
+    4:[["Bike com tiros","4× 1 min forte / 2 min leve"],["Negativas na barra","3×3 lentas"]]
+  };
+
+  function get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+  function set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+  function sameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+  function isoOf(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function toMin(t){ var p=t.split(":"); return (+p[0])*60 + (+p[1]); }
+
+  var viewDate = new Date();
+
+  function buildSteps(d, week, isLaunch, type){
+    var dow = d.getDay();
+    var steps = [];
+    function add(t, title, sub, key, workout){ steps.push({t:t, title:title, sub:sub, k:key, w:workout||null}); }
+
+    add("07:00","Acordar","💧 1 copo (250 ml) ao levantar — antes do celular.","acordar");
+    if (dow===1 || dow===4) add("07:05","Pesar em jejum","Depois do banheiro, antes de comer. Anote para o registro.","pesar");
+    if (dow===0) add("07:05","Medir a cintura","Fita no umbigo, sem apertar. 1× por semana, sempre no domingo.","cintura");
+    add("08:00","Remédio da manhã — 2 comprimidos","Remédio de todo dia, no horário de sempre.","prop");
+    if (dow===6) add("08:30","Aplicação semanal","Aplicação do sábado.","aplicacao");
+    add("08:15","Café da manhã","Pão + 2 ovos + queijo coalho (pedaço médio) + 1 fruta. ~30 g de proteína. 💧 1 copo junto.","cafe");
+    add("10:30","Água — 2 copos (500 ml)","Pausa da manhã. Meta parcial: 4 copos até o almoço. Melancia e melão contam a favor.","agua1");
+    add("12:30","Almoço","70–80 g de arroz + 100 g feijão + 150 g frango + salada/legume à vontade. ~46 g de proteína. 💧 1 copo junto.","almoco");
+    add("15:30","Lanche + último café","Iogurte com fruta, 2 ovos ou vitamina de banana com aveia. Cafeína só até agora. 💧 1 copo.","lanche");
+
+    if (type==="gym"){
+      add("09:40","Preparar para a academia","Garrafa de 500 ml + toalha. Coma algo antes se o café foi há muito tempo.","pretreino");
+      add("10:00","TREINO NA ACADEMIA","Aqueça 5 min na esteira ou bike leve. 💧 1 copo antes, goles durante. Anote as cargas no celular.","treino",{wk:"Semana "+week,list:GYM[week],tip:"Escolha a carga que deixa 3–4 repetições sobrando no fim da série. Descanse 60–90 s. Na primeira vez, peça ao instrutor para ajustar as máquinas. Dor de cabeça, aura ou tontura = parar na hora."});
+    } else if (type==="casa"){
+      var lst = CASA[week].slice();
+      var tip = "Ritmo da bike: dá pra conversar? Está certo. Não use frequência cardíaca como guia (seu remédio da manhã segura os batimentos). 💧 Garrafa do lado.";
+      if (dow===4 && week>=3){
+        lst.push(["Saco de pancadas", week>=4 ? "5–6 rounds 1 min/1 min" : "4 rounds 1 min/1 min"]);
+        tip += " Saco: golpes leves, técnica e respiração, esforço máximo 5 de 10.";
+      }
+      add("17:30","TREINO EM CASA","Bike + barra fixa — o complemento da academia. 💧 1 copo antes, goles durante.","treino",{wk:"Semana "+week,list:lst,tip:tip});
+    } else if (type==="rest"){
+      add("09:00","Caminhada na praça","30–40 min em ritmo confortável. Dia da aplicação: só a caminhada, sem treino pesado. 💧 Leve água.","treino");
+    } else {
+      add("09:00","Caminhada na praça","30–40 min em ritmo confortável. 💧 Leve água. Hoje também: \"FECHAMENTO DA SEMANA\" no chat.","treino");
+    }
+    if (dow>=1 && dow<=5) add("20:05","Caminhada leve — 30 min","Após o jantar, ritmo de conversa. Acelera o secar e melhora o sono. Cansado demais? 15 min valem.","caminhada");
+
+    add("19:30","Jantar","150–200 g de carne ou frango na airfryer + legume/salada. Proteína primeiro. 💧 1 copo junto — depois das 21h, só goles pequenos para não atrapalhar o sono.","jantar");
+    add("20:45","Sobremesa planejada","1 fruta, iogurte ou 1 quadrado de chocolate. Depois, escovar os dentes.","sobremesa");
+    add("21:00","Remédio da noite — 1 comprimido","Remédio da noite, no horário de sempre.","amit");
+    add("21:15","Registro do dia","Mande no chat: refeições, água, treino, sono, libido, energia, sintomas.","registro");
+    add("22:30","Desacelerar","Luz baixa, telas fracas. Confira o contador: fechou os 8 copos?","desligar");
+    add("23:30","Dormir","Consistência de horário vale mais que qualquer suplemento.","dormir");
+
+    steps.sort(function(a,b){ return a.t.localeCompare(b.t); });
+    return steps;
+  }
+
+  function dayType(d, isLaunch, week){
+    var dow = d.getDay();
+    if (dow===1 || dow===3 || dow===5) return {type:"gym", label:"ACADEMIA 10:00 · força"};
+    if (dow===2 || dow===4) return {type:"casa", label: (week>=3 && dow===4) ? "CASA 17:30 · bike + barra + saco" : "CASA 17:30 · bike + barra"};
+    if (dow===6) return {type:"rest", label:"Aplicação semanal · caminhada na praça", rest:true};
+    return {type:"free", label:"Caminhada na praça · fechamento", rest:true};
+  }
+
+  var tl = document.getElementById("timeline");
+  var viewIso = isoOf(viewDate);
+
+  function waterCount(iso){ var v = parseInt(get("fd-"+iso+"-agua-n")||"0",10); return isNaN(v)||v<0 ? 0 : v; }
+  function renderWater(){
+    var n = waterCount(viewIso);
+    var litros = (n*0.25).toFixed(2).replace(".",",");
+    document.getElementById("w-count").textContent = n+" "+(n===1?"copo":"copos")+" · "+litros+" L" + (n>=10 ? " 🌊" : n>=8 ? " ✅" : "");
+    var dots = document.getElementById("w-dots");
+    dots.innerHTML = "";
+    var total = Math.max(10, n);
+    for (var i=1;i<=total;i++){
+      var s = document.createElement("span");
+      if (i<=n) s.className = "fill";
+      if (i===8) s.className += " goal";
+      dots.appendChild(s);
+    }
+  }
+  document.getElementById("w-plus").addEventListener("click", function(){
+    set("fd-"+viewIso+"-agua-n", String(waterCount(viewIso)+1)); renderWater();
+  });
+  document.getElementById("w-minus").addEventListener("click", function(){
+    var n = waterCount(viewIso); if(n>0) set("fd-"+viewIso+"-agua-n", String(n-1)); renderWater();
+  });
+
+  function refresh(){
+    var boxes = tl.querySelectorAll("input[type=checkbox]");
+    var doneCount = 0;
+    boxes.forEach(function(cb){ if(cb.checked) doneCount++; });
+    var pct = boxes.length ? Math.round(doneCount/boxes.length*100) : 0;
+    document.getElementById("pfill").style.width = pct+"%";
+    document.getElementById("plabel").textContent = doneCount+" de "+boxes.length+" concluídos" + (boxes.length && doneCount===boxes.length ? " — dia fechado! 🔥":"");
+  }
+
+  function render(){
+    var now = new Date();
+    var isToday = sameDay(viewDate, now);
+    var iso = isoOf(viewDate);
+    viewIso = iso;
+    renderWater();
+    var dow = viewDate.getDay();
+    var week = Math.floor((viewDate - BLOCK_START)/(7*24*3600*1000)) + 1;
+    if (week < 1) week = 1;
+    if (week > 4) week = 4;
+    var isLaunch = viewDate < BLOCK_START;
+    var dt = dayType(viewDate, isLaunch, week);
+
+    document.getElementById("hdr-eyebrow").textContent = "Protocolo Foco · Semana " + week + (isLaunch ? " (largada)" : "") + " de 4";
+    document.getElementById("hdr-date").textContent = DIAS[dow] + ", " + viewDate.getDate() + " de " + MESES[viewDate.getMonth()];
+    var typeEl = document.getElementById("hdr-type");
+    typeEl.textContent = dt.label;
+    typeEl.classList.toggle("rest", !!dt.rest);
+
+    var note = document.getElementById("viewing-note");
+    if (isToday){ note.hidden = true; }
+    else {
+      note.hidden = false;
+      note.textContent = viewDate < now ? "◀ Revisando o histórico deste dia" : "▶ Espiando um dia futuro do plano";
+    }
+    document.getElementById("nav-today").disabled = isToday;
+
+    var nowIdx = -1;
+    var steps = buildSteps(viewDate, week, isLaunch, dt.type);
+    if (isToday){
+      var nowMin = now.getHours()*60 + now.getMinutes();
+      for (var i=0;i<steps.length;i++){ if (toMin(steps[i].t) <= nowMin) nowIdx = i; }
+    }
+
+    tl.innerHTML = "";
+    steps.forEach(function(s, idx){
+      var key = "fd-"+iso+"-"+s.k;
+      var done = get(key)==="1";
+      var el = document.createElement("div");
+      el.className = "step" + (idx===nowIdx ? " now":"") + (done ? " done":"");
+      el.dataset.k = s.k;
+      var wHtml = "";
+      if (s.w){
+        wHtml = '<div class="workout"><span class="wk">'+s.w.wk+'</span><ul>' +
+          s.w.list.map(function(x){ return '<li><b>'+x[0]+'</b>'+(x[1]?'<span class="sr">'+x[1]+'</span>':'')+'</li>'; }).join("") +
+          '</ul><p class="tip">'+s.w.tip+'</p></div>';
+      }
+      el.innerHTML =
+        '<div class="time">'+s.t+'</div>'+
+        '<div class="scard"><label><input type="checkbox" '+(done?'checked':'')+' data-key="'+key+'">'+
+        '<div><div class="t"><span>'+s.title+'</span>'+(idx===nowIdx?'<span class="nowpill">AGORA</span>':'')+'</div>'+
+        (s.sub?'<div class="sub">'+s.sub+'</div>':'')+'</div></label>'+wHtml+'</div>';
+      tl.appendChild(el);
+    });
+    refresh();
+  }
+
+  tl.addEventListener("change", function(e){
+    var cb = e.target;
+    if (cb.type!=="checkbox") return;
+    cb.checked ? set(cb.dataset.key,"1") : del(cb.dataset.key);
+    cb.closest(".step").classList.toggle("done", cb.checked);
+    refresh();
+  });
+
+  document.getElementById("nav-prev").addEventListener("click", function(){
+    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), viewDate.getDate()-1);
+    render();
+  });
+  document.getElementById("nav-next").addEventListener("click", function(){
+    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), viewDate.getDate()+1);
+    render();
+  });
+  document.getElementById("nav-today").addEventListener("click", function(){
+    viewDate = new Date();
+    render();
+  });
+
+  render();
+
+  // ---- Lembrete insistente: aviso na tela + apito a cada 5 min para item não marcado ----
+  var GRACE_MIN = 5;      // minutos após a hora do item antes do primeiro re-aviso
+  var WINDOW_MIN = 120;   // só insiste em itens atrasados há menos de 2 h
+  var BEEP_EVERY = 5*60*1000;
+  var lastBeep = 0;
+  var audioCtx = null;
+
+  var nagToggle = document.getElementById("nag-sound");
+  try{ nagToggle.checked = localStorage.getItem("fd-pref-nagsound")==="1"; }catch(e){}
+  nagToggle.addEventListener("change", function(){
+    try{ localStorage.setItem("fd-pref-nagsound", nagToggle.checked ? "1" : "0"); }catch(e){}
+    if (nagToggle.checked){ armAudio(); beep(); }
+  });
+  function armAudio(){
+    try{
+      if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      if (audioCtx.state==="suspended") audioCtx.resume();
+    }catch(e){}
+  }
+  document.addEventListener("pointerdown", armAudio, {passive:true});
+  function beep(){
+    if (!audioCtx) return;
+    try{
+      [0, 0.22].forEach(function(offset){
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = "sine"; o.frequency.value = 880;
+        g.gain.setValueAtTime(0.0001, audioCtx.currentTime + offset);
+        g.gain.exponentialRampToValueAtTime(0.25, audioCtx.currentTime + offset + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + offset + 0.18);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(audioCtx.currentTime + offset); o.stop(audioCtx.currentTime + offset + 0.2);
+      });
+    }catch(e){}
+  }
+
+  var nagbar = document.getElementById("nagbar");
+  var nagKey = null;
+  function pendingSteps(){
+    var now = new Date();
+    var iso = isoOf(now);
+    var nowMin = now.getHours()*60 + now.getMinutes();
+    var week = Math.floor((now - BLOCK_START)/(7*24*3600*1000)) + 1;
+    if (week<1) week=1; if (week>4) week=4;
+    var isLaunch = now < BLOCK_START;
+    var dt = dayType(now, isLaunch, week);
+    var steps = buildSteps(now, week, isLaunch, dt.type);
+    return steps.filter(function(s){
+      var late = nowMin - toMin(s.t);
+      return late >= GRACE_MIN && late <= WINDOW_MIN && get("fd-"+iso+"-"+s.k)!=="1";
+    });
+  }
+  function nagTick(){
+    var pend = pendingSteps();
+    if (!pend.length){
+      nagbar.hidden = true; document.body.classList.remove("has-nag");
+      nagKey = null; lastBeep = 0;
+      return;
+    }
+    var s = pend[pend.length-1];
+    var now = new Date();
+    var late = now.getHours()*60 + now.getMinutes() - toMin(s.t);
+    document.getElementById("nag-text").innerHTML =
+      "Pendente: " + s.title + " <small>era às " + s.t + " (há " + late + " min)" +
+      (pend.length>1 ? " · +" + (pend.length-1) + " item(ns) antes" : "") +
+      " — toque para ver, marque para silenciar</small>";
+    nagbar.hidden = false; document.body.classList.add("has-nag");
+    nagKey = s.k;
+    if (nagToggle.checked && Date.now() - lastBeep >= BEEP_EVERY){
+      beep(); lastBeep = Date.now();
+    }
+  }
+  nagbar.addEventListener("click", function(){
+    viewDate = new Date(); render();
+    var el = nagKey ? tl.querySelector('.step[data-k="'+nagKey+'"]') : null;
+    if (el) el.scrollIntoView({behavior:"smooth", block:"center"});
+  });
+  tl.addEventListener("change", function(){ nagTick(); });
+  setInterval(nagTick, 20000);
+  nagTick();
+
+  // Mantém a etiqueta "AGORA" atualizada quando o app fica aberto no dia de hoje
+  setInterval(function(){ if (sameDay(viewDate, new Date())) render(); }, 60000);
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) { navigator.serviceWorker.register("./sw.js"); }
+</script>
+</body>
+</html>
+
