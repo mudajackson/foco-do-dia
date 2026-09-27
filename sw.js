@@ -1,5 +1,5 @@
 ﻿// Service worker do Foco do Dia — deixa o app funcionar offline
-const CACHE = "foco-v3";
+const CACHE = "foco-v4";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (e) => {
@@ -41,5 +41,6 @@ self.addEventListener("fetch", (e) => {
     );
   }
 });
+
 
 

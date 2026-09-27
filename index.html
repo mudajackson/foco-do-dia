@@ -236,8 +236,9 @@ a.link{color:var(--accent); font-weight:600; text-decoration:none}
   <div class="alarm"><span class="at">12:30</span><span class="al"><b>Almoço</b> + 1 copo de água</span><span class="rep">todos os dias</span></div>
   <div class="alarm"><span class="at">15:30</span><span class="al"><b>Lanche</b> + água + último café</span><span class="rep">todos os dias</span></div>
   <div class="alarm"><span class="at">17:25</span><span class="al"><b>Treino em casa</b> (bike + barra)</span><span class="rep">ter e qui</span></div>
-  <div class="alarm"><span class="at">19:30</span><span class="al"><b>Jantar</b> — proteína primeiro</span><span class="rep">todos os dias</span></div>
-  <div class="alarm"><span class="at">20:00</span><span class="al"><b>Caminhada leve</b> — 30 min</span><span class="rep">seg a sex</span></div>
+  <div class="alarm"><span class="at">20:25</span><span class="al"><b>Caminhada leve</b> — 30 min pós-jantar</span><span class="rep">seg a sex</span></div>
+  <div class="alarm"><span class="at">20:00</span><span class="al"><b>Jantar</b> — proteína primeiro</span><span class="rep">todos os dias</span></div>
+  
   <div class="alarm"><span class="at">20:55</span><span class="al"><b>Remédio da noite</b> (1 comprimido às 21h)</span><span class="rep">todos os dias</span></div>
   <div class="alarm"><span class="at">21:15</span><span class="al"><b>Registro do dia</b> no chat</span><span class="rep">todos os dias</span></div>
   <div class="alarm"><span class="at">22:30</span><span class="al"><b>Desacelerar</b> — luz baixa, telas fracas</span><span class="rep">todos os dias</span></div>
@@ -298,8 +299,8 @@ a.link{color:var(--accent); font-weight:600; text-decoration:none}
     if (dow===6) add("08:30","Aplicação semanal","Aplicação do sábado.","aplicacao");
     add("08:15","Café da manhã","Pão + 2 ovos + queijo coalho (pedaço médio) + 1 fruta. ~30 g de proteína. 💧 1 copo junto.","cafe");
     add("10:30","Água — 2 copos (500 ml)","Pausa da manhã. Meta parcial: 4 copos até o almoço. Melancia e melão contam a favor.","agua1");
-    add("12:30","Almoço","70–80 g de arroz + 100 g feijão + 150 g frango + salada/legume à vontade (+1 ovo cozido se quiser). ~46 g de proteína. 💧 1 copo junto.","almoco");
-    add("15:30","Lanche + último café","2–3 ovos cozidos + 1 fruta (o favorito!); ou iogurte com fruta, ou vitamina de banana com aveia. Cafeína só até agora. 💧 1 copo.","lanche");
+    add("12:30","Almoço","100 g arroz + 150 g frango/carne + 2 ovos cozidos + salada à vontade (feijão se couber) + creatina 5 g + ômega-3. ~59 g de proteína. 💧 1 copo junto.","almoco");
+    add("15:30","Lanche + último café","Vitamina de banana com aveia + 1 dose de whey, ou iogurte + fruta (sem ovos — os 6 do dia já estão nas refeições). Cafeína só até agora. 💧 1 copo.","lanche");
 
     if (type==="gym"){
       add("09:40","Preparar para a academia","Garrafa de 500 ml + toalha. Coma algo antes se o café foi há muito tempo.","pretreino");
@@ -317,10 +318,10 @@ a.link{color:var(--accent); font-weight:600; text-decoration:none}
     } else {
       add("09:00","Caminhada na praça","30–40 min em ritmo confortável. 💧 Leve água. Hoje também: \"FECHAMENTO DA SEMANA\" no chat.","treino");
     }
-    if (dow>=1 && dow<=5) add("20:05","Caminhada leve — 30 min","Após o jantar, ritmo de conversa. Acelera o secar e melhora o sono. Cansado demais? 15 min valem.","caminhada");
+    if (dow>=1 && dow<=5) add("20:30","Caminhada leve — 30 min","Logo após o jantar, ritmo de conversa. Ajuda na digestão, na glicemia e no secar. Volte até 21:00 para o remédio. Cansado demais? 15 min valem.","caminhada");
 
-    add("19:30","Jantar","150–200 g de carne ou frango na airfryer + legume/salada (carne pouca? +2 ovos cozidos). Proteína primeiro. Limite do dia: ~5 ovos até saírem os exames. 💧 1 copo junto — depois das 21h, só goles pequenos.","jantar");
-    add("20:45","Sobremesa planejada","1 fruta, iogurte ou 1 quadrado de chocolate. Depois, escovar os dentes.","sobremesa");
+    add("20:00","Jantar","100 g arroz + 150 g de carne ou frango na airfryer + 2 ovos cozidos + legume/salada. ~55 g de proteína. Proteína primeiro. 💧 1 copo junto — depois das 21h, só goles pequenos.","jantar");
+    add("21:05","Sobremesa planejada","1 fruta, iogurte ou 1 quadrado de chocolate. Depois, escovar os dentes.","sobremesa");
     add("21:00","Remédio da noite — 1 comprimido","Remédio da noite, no horário de sempre.","amit");
     add("21:15","Registro do dia","Mande no chat: refeições, água, treino, sono, libido, energia, sintomas.","registro");
     add("22:30","Desacelerar","Luz baixa, telas fracas. Confira o contador: fechou os 8 copos?","desligar");
@@ -536,6 +537,9 @@ a.link{color:var(--accent); font-weight:600; text-decoration:none}
   setInterval(function(){ if (sameDay(viewDate, new Date())) render(); }, 60000);
 })();
 </script>
+
+
+
 
 <script>
 if ("serviceWorker" in navigator) { navigator.serviceWorker.register("./sw.js"); }
